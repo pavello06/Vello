@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:vello/screens/auth/login_screen.dart';
 import 'package:vello/screens/home_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+
+late Size mq;
 
 void main() {
+  _initializeFirebase();
   runApp(const MyApp());
 }
 
@@ -20,7 +27,7 @@ class MyApp extends StatelessWidget {
           titleTextStyle: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.normal,
-            fontSize: 29,
+            fontSize: 25,
           ),
           backgroundColor: Colors.orange,
         ),
@@ -30,7 +37,13 @@ class MyApp extends StatelessWidget {
 
         ),
       ),
-      home: const HomeScreen(),
+      home: const LoginScreen(),
     );
   }
+}
+
+_initializeFirebase() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 }
