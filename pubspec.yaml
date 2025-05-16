@@ -24,6 +24,12 @@ dependencies:
 
   cached_network_image: ^3.4.1
 
+  image_picker: ^1.1.2
+
+  cloudinary: ^1.2.0
+
+  flutter_dotenv: ^5.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -41,3 +47,4 @@ flutter:
 
   assets:
     - images/
+    - .env
