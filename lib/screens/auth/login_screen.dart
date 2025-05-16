@@ -32,14 +32,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
   _handleGoogleBtnClick() {
     Dialogs.showProgressBar(context);
-    _signInWithGoogle().then((user) {
+    _signInWithGoogle().then((user) async {
       Navigator.pop(context);
 
       if (user != null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => HomeScreen()),
-        );
+        if (await APIs.userExists()) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => HomeScreen()),
+          );
+        } else {
+          await APIs.createUser().then((value) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => HomeScreen()),
+            );
+          });
+        }
       }
     });
   }
@@ -51,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
       final GoogleSignInAuthentication? googleAuth =
-      await googleUser?.authentication;
+          await googleUser?.authentication;
 
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth?.accessToken,
@@ -73,8 +82,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    mq = MediaQuery.of(context).size;
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -86,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
             top: mq.height * 0.15,
             right: _isAnimate ? mq.width * 0.25 : -mq.width * 0.5,
             width: mq.width * 0.5,
-            duration: Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 500),
             child: Image.asset('images/icon.png'),
           ),
           Positioned(
@@ -105,11 +112,11 @@ class _LoginScreenState extends State<LoginScreen> {
               },
               icon: Image.asset('images/google.png', height: mq.height * 0.03),
               label: RichText(
-                text: const TextSpan(
-                  style: TextStyle(color: Colors.white, fontSize: 19),
+                text: TextSpan(
+                  style: const TextStyle(color: Colors.white, fontSize: 19),
                   children: [
-                    TextSpan(text: 'Login with '),
-                    TextSpan(
+                    const TextSpan(text: 'Login with '),
+                    const TextSpan(
                       text: 'Google',
                       style: TextStyle(fontWeight: FontWeight.w500),
                     ),
