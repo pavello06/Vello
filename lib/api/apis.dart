@@ -1,5 +1,10 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloudinary/cloudinary.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../models/chat_user.dart';
 
@@ -7,6 +12,9 @@ class APIs {
   static FirebaseAuth auth = FirebaseAuth.instance;
 
   static FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  static Cloudinary storage = Cloudinary.unsignedConfig(
+      cloudName: dotenv.env['CLOUDINARY_CLOUD_NAME']!);
 
   static User get user => auth.currentUser!;
 
@@ -27,7 +35,10 @@ class APIs {
   }
 
   static Future<void> createUser() async {
-    final time = DateTime.now().millisecondsSinceEpoch.toString();
+    final time = DateTime
+        .now()
+        .millisecondsSinceEpoch
+        .toString();
 
     final chatUser = ChatUser(
       id: user.uid,
@@ -59,5 +70,20 @@ class APIs {
       'name': me.name,
       'about': me.about,
     });
+  }
+
+  static Future<void> updateProfilePicture(File file) async {
+    final response = await storage.unsignedUpload(
+      file: file.path,
+      uploadPreset: dotenv.env['CLOUDINARY_UPLOAD_PRESET']!,
+      fileBytes: file.readAsBytesSync(),
+      resourceType: CloudinaryResourceType.image,
+      folder: dotenv.env['CLOUDINARY_PROFILE_PICTURES_FOLDER']!,
+      fileName: '${user.uid}${DateTime.now().millisecondsSinceEpoch}',
+    );
+
+    me.image = response.secureUrl!;
+    log(response.secureUrl!);
+    await firestore.collection('users').doc(user.uid).update({'image': me.image});
   }
 }
