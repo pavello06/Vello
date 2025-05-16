@@ -2,11 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:vello/helper/dialogs.dart';
-import 'package:vello/models/chat_user.dart';
 
 import '../api/apis.dart';
+import '../helper/dialogs.dart';
 import '../main.dart';
+import '../models/chat_user.dart';
 import 'auth/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -23,113 +23,151 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Профиль')),
+    final _formKey = GlobalKey<FormState>();
 
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: FloatingActionButton.extended(
-          backgroundColor: Colors.deepOrange,
-          onPressed: () async {
-            Dialogs.showProgressBar(context);
-            await APIs.auth.signOut();
-            await GoogleSignIn().signOut().then((value) {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-              );
-            });
-          },
-          icon: const Icon(Icons.logout),
-          label: Text('Выйти из аккаунта'),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Profile')),
+
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: FloatingActionButton.extended(
+            backgroundColor: Colors.deepOrange,
+            onPressed: () async {
+              Dialogs.showProgressBar(context);
+              await APIs.auth.signOut();
+              await GoogleSignIn().signOut().then((value) {
+                Navigator.pop(context);
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                );
+              });
+            },
+            icon: const Icon(Icons.logout),
+            label: Text('Logout'),
+          ),
         ),
-      ),
 
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: mq.width * 0.05),
-        child: Column(
-          children: [
-            SizedBox(width: mq.width, height: mq.height * 0.03),
+        body: Form(
+          key: _formKey,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: mq.width * 0.05),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  SizedBox(width: mq.width, height: mq.height * 0.03),
 
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(mq.height * 0.1),
-                  child: CachedNetworkImage(
-                    width: mq.height * 0.2,
-                    height: mq.height * 0.2,
-                    imageUrl: widget.user.image,
-                    errorWidget:
-                        (context, url, error) => const CircleAvatar(
-                          child: Icon(CupertinoIcons.person),
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(mq.height * 0.1),
+                        child: CachedNetworkImage(
+                          width: mq.height * 0.2,
+                          height: mq.height * 0.2,
+                          imageUrl: widget.user.image,
+                          errorWidget:
+                              (context, url, error) => const CircleAvatar(
+                                child: Icon(CupertinoIcons.person),
+                              ),
                         ),
+                      ),
+
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: MaterialButton(
+                          onPressed: () {},
+                          shape: CircleBorder(),
+                          color: Colors.white,
+                          child: const Icon(Icons.edit, color: Colors.orange),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
 
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: MaterialButton(
-                    onPressed: () {},
-                    shape: CircleBorder(),
-                    color: Colors.white,
-                    child: const Icon(Icons.edit, color: Colors.orange),
+                  SizedBox(width: mq.width, height: mq.height * 0.03),
+
+                  Text(
+                    widget.user.email,
+                    style: const TextStyle(color: Colors.orange, fontSize: 20),
                   ),
-                ),
-              ],
-            ),
 
-            SizedBox(width: mq.width, height: mq.height * 0.03),
+                  SizedBox(width: mq.width, height: mq.height * 0.05),
 
-            Text(
-              widget.user.email,
-              style: const TextStyle(color: Colors.orange, fontSize: 20),
-            ),
+                  TextFormField(
+                    initialValue: widget.user.name,
+                    onSaved: (value) => APIs.me.name = value ?? '',
+                    validator:
+                        (value) =>
+                            value != null && value.isNotEmpty
+                                ? null
+                                : 'Required field',
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.person, color: Colors.orange),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      hintText: 'eg. Pavel Halukha',
+                      label: Text('Name'),
+                    ),
+                  ),
 
-            SizedBox(width: mq.width, height: mq.height * 0.05),
+                  SizedBox(width: mq.width, height: mq.height * 0.02),
 
-            TextFormField(
-              initialValue: widget.user.name,
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.person, color: Colors.orange),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                hintText: 'например Павел Галуха',
-                label: Text('Имя'),
+                  TextFormField(
+                    initialValue: widget.user.about,
+                    onSaved: (value) => APIs.me.about = value ?? '',
+                    validator:
+                        (value) =>
+                            value != null && value.isNotEmpty
+                                ? null
+                                : 'Required field',
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(
+                        Icons.info_outline,
+                        color: Colors.orange,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      hintText: 'eg. Feeling good',
+                      label: Text('About'),
+                    ),
+                  ),
+
+                  SizedBox(width: mq.width, height: mq.height * 0.05),
+
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      shape: StadiumBorder(),
+                      maximumSize: Size(mq.width * 0.4, mq.height * 0.06),
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.orange,
+                    ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+                        APIs.updateUserInfo().then((value) {
+                          Dialogs.showSnackBar(
+                            context,
+                            'Profile updated successfully',
+                          );
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.edit),
+                    label: const Text(
+                      'Update',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ],
               ),
             ),
-
-            SizedBox(width: mq.width, height: mq.height * 0.02),
-
-            TextFormField(
-              initialValue: widget.user.about,
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.info_outline, color: Colors.orange),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                hintText: 'например Чувствую себя хорошо',
-                label: Text('О вас'),
-              ),
-            ),
-
-            SizedBox(width: mq.width, height: mq.height * 0.05),
-
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                shape: StadiumBorder(),
-                maximumSize: Size(mq.width * 0.4, mq.height * 0.06),
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.orange,
-              ),
-              onPressed: () {},
-              icon: const Icon(Icons.edit),
-              label: const Text('Обновить', style: TextStyle(fontSize: 16)),
-            ),
-          ],
+          ),
         ),
       ),
     );
