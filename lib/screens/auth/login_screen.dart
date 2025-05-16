@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:vello/helper/dialogs.dart';
 
+import '../../api/apis.dart';
 import '../../main.dart';
 import '../home_screen.dart';
 
@@ -57,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
         idToken: googleAuth?.idToken,
       );
 
-      return await FirebaseAuth.instance.signInWithCredential(credential);
+      return await APIs.auth.signInWithCredential(credential);
     } catch (err) {
       log('\n_signInWithGoogle: $err');
       Dialogs.showSnackBar(context, 'Something went wrong (check internet!)');
@@ -66,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   _signOut() async {
-    await FirebaseAuth.instance.signOut();
+    await APIs.auth.signOut();
     await GoogleSignIn().signOut();
   }
 
@@ -105,12 +106,12 @@ class _LoginScreenState extends State<LoginScreen> {
               icon: Image.asset('images/google.png', height: mq.height * 0.03),
               label: RichText(
                 text: const TextSpan(
-                  style: const TextStyle(color: Colors.white, fontSize: 19),
+                  style: TextStyle(color: Colors.white, fontSize: 19),
                   children: [
-                    const TextSpan(text: 'Login with '),
-                    const TextSpan(
+                    TextSpan(text: 'Login with '),
+                    TextSpan(
                       text: 'Google',
-                      style: const TextStyle(fontWeight: FontWeight.w500),
+                      style: TextStyle(fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),

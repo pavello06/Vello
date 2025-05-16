@@ -1,8 +1,8 @@
 import 'dart:developer';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:vello/api/apis.dart';
 
 import '../../main.dart';
 import 'auth/login_screen.dart';
@@ -25,8 +25,8 @@ class _SplashScreenState extends State<SplashScreen> {
         const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
       );
 
-      if (FirebaseAuth.instance.currentUser != null) {
-        log('\nUser: ${FirebaseAuth.instance.currentUser}');
+      if (APIs.auth.currentUser != null) {
+        log('\nUser: ${APIs.auth.currentUser}');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: const Text(
               'Made by pavello06 with ❤️',
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 color: Colors.orange,
                 letterSpacing: 0.5,
