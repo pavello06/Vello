@@ -1,7 +1,7 @@
 class ChatUser {
-  late final String image;
-  late final String name;
-  late final String about;
+  late String image;
+  late String name;
+  late String about;
   late final String createdAt;
   late final String id;
   late final bool isOnline;

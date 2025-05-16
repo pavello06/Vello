@@ -75,11 +75,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  _signOut() async {
-    await APIs.auth.signOut();
-    await GoogleSignIn().signOut();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

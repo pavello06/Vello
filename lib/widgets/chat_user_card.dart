@@ -25,14 +25,14 @@ class _ChatUserCardState extends State<ChatUserCard> {
         onTap: () {},
         child: ListTile(
           leading: ClipRRect(
-            borderRadius: BorderRadius.circular(mq.height * 0.3),
+            borderRadius: BorderRadius.circular(mq.height * 0.03),
             child: CachedNetworkImage(
-              width: mq.height * 0.55,
-              height: mq.height * 0.55,
+              width: mq.height * 0.055,
+              height: mq.height * 0.055,
               imageUrl: widget.user.image,
               errorWidget:
                   (context, url, error) =>
-                      const CircleAvatar(child: Icon(CupertinoIcons.person)),
+              const CircleAvatar(child: Icon(CupertinoIcons.person)),
             ),
           ),
           title: Text(widget.user.name),
