@@ -1,10 +1,8 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:vello/models/chat_user.dart';
+import 'package:vello/screens/profile_screen.dart';
 import 'package:vello/widgets/chat_user_card.dart';
 
 import '../api/apis.dart';
@@ -21,6 +19,12 @@ class _HomeScreenState extends State<HomeScreen> {
   List<ChatUser> list = [];
 
   @override
+  void initState() {
+    super.initState();
+    APIs.getSelfInfo();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -28,21 +32,26 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Vello'),
         actions: [
           IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => ProfileScreen(user: APIs.me)),
+              );
+            },
+            icon: const Icon(Icons.more_vert),
+          ),
         ],
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: FloatingActionButton(
-          onPressed: () async {
-            await APIs.auth.signOut();
-            await GoogleSignIn().signOut();
-          },
+          onPressed: () {},
           child: const Icon(Icons.add_comment_rounded),
         ),
       ),
       body: StreamBuilder(
-        stream: APIs.firestore.collection('users').snapshots(),
+        stream: APIs.getAllUsers(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
