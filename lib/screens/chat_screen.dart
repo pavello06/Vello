@@ -7,6 +7,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:vello/helper/date_util.dart';
 import 'package:vello/models/message.dart';
 import 'package:vello/widgets/message_card.dart';
@@ -29,7 +30,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   final _textController = TextEditingController();
 
-  bool _showEmoji = false;
+  bool _showEmoji = false, _isUploading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +82,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
                           if (_list.isNotEmpty) {
                             return ListView.builder(
+                              reverse: true,
                               itemCount: _list.length,
                               padding: EdgeInsets.only(top: mq.height * 0.01),
                               physics: const BouncingScrollPhysics(),
@@ -103,6 +105,19 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   ),
                 ),
+
+                if (_isUploading)
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 20,
+                      ),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+
                 _chatInput(),
 
                 if (_showEmoji)
@@ -212,8 +227,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                       onTap: () {
-                        if (_showEmoji)
+                        if (_showEmoji) {
                           setState(() => _showEmoji = !_showEmoji);
+                        }
                       },
                       decoration: InputDecoration(
                         hintText: 'Type something...',
@@ -224,7 +240,18 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
 
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      final ImagePicker picker = ImagePicker();
+                      final List<XFile?> images = await picker.pickMultiImage(
+                        imageQuality: 70,
+                      );
+
+                      for (var image in images) {
+                        setState(() => _isUploading = true);
+                        await APIs.sendImage(widget.user, File(image!.path));
+                        setState(() => _isUploading = false);
+                      }
+                    },
                     icon: const Icon(
                       Icons.image,
                       color: Colors.orange,
@@ -233,7 +260,16 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
 
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      final ImagePicker picker = ImagePicker();
+                      final XFile? image = await picker.pickImage(
+                        source: ImageSource.camera,
+                        imageQuality: 70,
+                      );
+                      if (image != null) {
+                        await APIs.sendImage(widget.user, File(image.path));
+                      }
+                    },
                     icon: const Icon(
                       Icons.camera_alt_rounded,
                       color: Colors.orange,
@@ -250,7 +286,7 @@ class _ChatScreenState extends State<ChatScreen> {
           MaterialButton(
             onPressed: () {
               if (_textController.text.isNotEmpty) {
-                APIs.sendMessage(widget.user, _textController.text);
+                APIs.sendMessage(widget.user, _textController.text, Type.text);
                 _textController.text = '';
               }
             },

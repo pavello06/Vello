@@ -61,13 +61,18 @@ class _ChatUserCardState extends State<ChatUserCard> {
               ),
               title: Text(widget.user.name),
               subtitle: Text(
-                _message != null ? _message!.message : widget.user.about,
+                _message != null
+                    ? _message!.type == Type.image
+                        ? 'image'
+                        : _message!.message
+                    : widget.user.about,
                 maxLines: 1,
               ),
               trailing:
                   _message == null
                       ? null
-                      : _message!.readAt.isEmpty
+                      : _message!.readAt.isEmpty &&
+                          _message!.senderId != APIs.user.uid
                       ? SizedBox(
                         width: 15,
                         height: 15,
@@ -83,7 +88,7 @@ class _ChatUserCardState extends State<ChatUserCard> {
                           context: context,
                           time: _message!.sentAt,
                         ),
-                        style: TextStyle(color: Colors.orange),
+                        style: TextStyle(color: Colors.orange, fontSize: 15),
                       ),
             );
           },

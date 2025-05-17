@@ -98,16 +98,21 @@ class APIs {
   ) {
     return firestore
         .collection('chats/${getConversationID(user.id)}/messages/')
+        .orderBy('sent_at', descending: true)
         .snapshots();
   }
 
-  static Future<void> sendMessage(ChatUser chatUser, String msg) async {
+  static Future<void> sendMessage(
+    ChatUser chatUser,
+    String msg,
+    Type type,
+  ) async {
     final time = DateTime.now().millisecondsSinceEpoch.toString();
 
     final message = Message(
       readAt: '',
       message: msg,
-      type: Type.text,
+      type: type,
       senderId: user.uid,
       sentAt: time,
       recipientId: chatUser.id,
@@ -127,11 +132,27 @@ class APIs {
   }
 
   static Stream<QuerySnapshot<Map<String, dynamic>>> getLastMessage(
-      ChatUser user) {
+    ChatUser user,
+  ) {
     return firestore
         .collection('chats/${getConversationID(user.id)}/messages/')
         .orderBy('sent_at', descending: true)
         .limit(1)
         .snapshots();
+  }
+
+  static Future<void> sendImage(ChatUser chatUser, File file) async {
+    final response = await storage.unsignedUpload(
+      file: file.path,
+      uploadPreset: dotenv.env['CLOUDINARY_UPLOAD_PRESET']!,
+      fileBytes: file.readAsBytesSync(),
+      resourceType: CloudinaryResourceType.image,
+      folder:
+          '${dotenv.env['CLOUDINARY_IMAGES_FOLDER']!}/${getConversationID(chatUser.id)}',
+      fileName: '${DateTime.now().millisecondsSinceEpoch}',
+    );
+
+    final imageUrl = response.secureUrl!;
+    await sendMessage(chatUser, imageUrl, Type.image);
   }
 }
