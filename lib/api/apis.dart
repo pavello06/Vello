@@ -125,4 +125,13 @@ class APIs {
         .doc(message.sentAt)
         .update({'read_at': DateTime.now().millisecondsSinceEpoch.toString()});
   }
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getLastMessage(
+      ChatUser user) {
+    return firestore
+        .collection('chats/${getConversationID(user.id)}/messages/')
+        .orderBy('sent_at', descending: true)
+        .limit(1)
+        .snapshots();
+  }
 }
