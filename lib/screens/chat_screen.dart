@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vello/helper/date_util.dart';
 import 'package:vello/models/message.dart';
+import 'package:vello/screens/view_profile_screen.dart';
 import 'package:vello/widgets/message_card.dart';
 
 import '../api/apis.dart';
@@ -142,7 +143,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _appBar() {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ViewProfileScreen(user: widget.user),
+          ),
+        );
+      },
       child: StreamBuilder(
         stream: APIs.getUserInfo(widget.user),
         builder: (context, snapshot) {
