@@ -155,4 +155,20 @@ class APIs {
     final imageUrl = response.secureUrl!;
     await sendMessage(chatUser, imageUrl, Type.image);
   }
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getUserInfo(
+    ChatUser user,
+  ) {
+    return firestore
+        .collection('users')
+        .where('id', isEqualTo: user.id)
+        .snapshots();
+  }
+
+  static Future<void> updateActiveStatus(bool isOnline) async {
+    firestore.collection('users').doc(user.uid).update({
+      'is_online': isOnline,
+      'last_active': DateTime.now().millisecondsSinceEpoch.toString(),
+    });
+  }
 }

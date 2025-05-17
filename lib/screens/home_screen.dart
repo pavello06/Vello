@@ -25,6 +25,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     APIs.getSelfInfo();
+    SystemChannels.lifecycle.setMessageHandler((message) {
+      if (APIs.auth.currentUser != null) {
+        if (message.toString().contains('resume')) APIs.updateActiveStatus(true);
+        if (message.toString().contains('pause')) APIs.updateActiveStatus(false);
+      }
+
+      return Future.value(message);
+    });
   }
 
   @override

@@ -143,53 +143,73 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _appBar() {
     return InkWell(
       onTap: () {},
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-          ),
+      child: StreamBuilder(
+        stream: APIs.getUserInfo(widget.user),
+        builder: (context, snapshot) {
+          final data = snapshot.data?.docs;
+          final list =
+              data?.map((e) => ChatUser.fromJson(e.data())).toList() ?? [];
 
-          ClipRRect(
-            borderRadius: BorderRadius.circular(mq.height * 0.03),
-            child: CachedNetworkImage(
-              width: mq.height * 0.055,
-              height: mq.height * 0.055,
-              imageUrl: widget.user.image,
-              errorWidget:
-                  (context, url, error) =>
-                      const CircleAvatar(child: Icon(CupertinoIcons.person)),
-            ),
-          ),
-
-          SizedBox(width: 10),
-
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
+          return Row(
             children: [
-              Text(
-                widget.user.name,
-                style: TextStyle(
-                  fontSize: 19,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
+              IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+              ),
+
+              ClipRRect(
+                borderRadius: BorderRadius.circular(mq.height * 0.03),
+                child: CachedNetworkImage(
+                  width: mq.height * 0.055,
+                  height: mq.height * 0.055,
+                  imageUrl: widget.user.image,
+                  errorWidget:
+                      (context, url, error) => const CircleAvatar(
+                        child: Icon(CupertinoIcons.person),
+                      ),
                 ),
               ),
 
-              Text(
-                'Last seen not available',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
+              SizedBox(width: 10),
+
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    list.isNotEmpty ? list[0].name : widget.user.name,
+                    style: TextStyle(
+                      fontSize: 19,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+
+                  Text(
+                    list.isNotEmpty
+                        ? list[0].isOnline
+                            ? 'Online'
+                            : DateUtil.getLastActiveTime(
+                              context: context,
+                              lastActive: list[0].lastActive,
+                            )
+                        : DateUtil.getLastActiveTime(
+                          context: context,
+                          lastActive: widget.user.lastActive,
+                        ),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }
