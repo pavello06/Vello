@@ -23,7 +23,7 @@ class _MessageCardState extends State<MessageCard> {
   }
 
   Widget _senderMessage() {
-    if (widget.message.readAt.isNotEmpty) {
+    if (widget.message.readAt.isEmpty) {
       APIs.updateMessageReadStatus(widget.message);
     }
 
