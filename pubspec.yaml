@@ -30,6 +30,8 @@ dependencies:
 
   flutter_dotenv: ^5.2.1
 
+  emoji_picker_flutter: ^4.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
