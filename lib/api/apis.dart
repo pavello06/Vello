@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloudinary/cloudinary.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:vello/models/message.dart';
 
 import '../models/chat_user.dart';
 
@@ -14,7 +15,8 @@ class APIs {
   static FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   static Cloudinary storage = Cloudinary.unsignedConfig(
-      cloudName: dotenv.env['CLOUDINARY_CLOUD_NAME']!);
+    cloudName: dotenv.env['CLOUDINARY_CLOUD_NAME']!,
+  );
 
   static User get user => auth.currentUser!;
 
@@ -35,10 +37,7 @@ class APIs {
   }
 
   static Future<void> createUser() async {
-    final time = DateTime
-        .now()
-        .millisecondsSinceEpoch
-        .toString();
+    final time = DateTime.now().millisecondsSinceEpoch.toString();
 
     final chatUser = ChatUser(
       id: user.uid,
@@ -84,6 +83,46 @@ class APIs {
 
     me.image = response.secureUrl!;
     log(response.secureUrl!);
-    await firestore.collection('users').doc(user.uid).update({'image': me.image});
+    await firestore.collection('users').doc(user.uid).update({
+      'image': me.image,
+    });
+  }
+
+  static String getConversationID(String id) =>
+      user.uid.hashCode <= id.hashCode
+          ? '${user.uid}_$id'
+          : '${id}_${user.uid}';
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessages(
+    ChatUser user,
+  ) {
+    return firestore
+        .collection('chats/${getConversationID(user.id)}/messages/')
+        .snapshots();
+  }
+
+  static Future<void> sendMessage(ChatUser chatUser, String msg) async {
+    final time = DateTime.now().millisecondsSinceEpoch.toString();
+
+    final message = Message(
+      readAt: '',
+      message: msg,
+      type: Type.text,
+      senderId: user.uid,
+      sentAt: time,
+      recipientId: chatUser.id,
+    );
+
+    final ref = firestore.collection(
+      'chats/${getConversationID(chatUser.id)}/messages/',
+    );
+    await ref.doc(time).set(message.toJson());
+  }
+
+  static Future<void> updateMessageReadStatus(Message message) async {
+    firestore
+        .collection('chats/${getConversationID(message.senderId)}/messages/')
+        .doc(message.sentAt)
+        .update({'read_at': DateTime.now().millisecondsSinceEpoch.toString()});
   }
 }
